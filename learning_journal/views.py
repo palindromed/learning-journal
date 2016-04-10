@@ -81,6 +81,8 @@ def edit_view(request):
     post_to_edit = Post.by_id(edit_id)
     form = ModifyPostForm(request.POST, post_to_edit)
 
+    form.existing_categories.choices = Post.get_choices()
+
     detail_url = request.route_url('detail', post_id=edit_id)
 
     if request.method == 'POST' and form.validate():

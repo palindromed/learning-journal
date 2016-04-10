@@ -71,7 +71,6 @@ class Post(Base):
     @classmethod
     def modify(cls, form, id):
         """Update an existing post."""
-        # import pdb; pdb.set_trace()
         instance = cls.by_id(id)
         instance.title = form['title'].data
         instance.text = form['text'].data
@@ -79,6 +78,11 @@ class Post(Base):
         # instance.created = instance.created
         DBSession.add(instance)
         return instance
+
+    @classmethod
+    def get_choices(self):
+        cats = DBSession.query(Category).order_by(Category.name).all()
+        return [(cat.id, cat.name) for cat in cats]
 
 
 class User(Base):
@@ -166,3 +170,5 @@ class Category(Base):
     def to_json(self, request=None):
         """Return JSON of category."""
         return self.__json__(request)
+
+
