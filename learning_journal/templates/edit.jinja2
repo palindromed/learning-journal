@@ -18,7 +18,7 @@
           <form id="{{use_case}}" method='POST' class="form-horizontal">
           <input type="hidden" name="postid" value="{{form.id.data}}"/>
             <div name='category' class="input">
-            {{ form.categories.label }}: {{ form.categories() }}</div>
+            {{ form.categories.label }}:   {{ form.categories()}}</div>
              <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token()}}"/>
             <div name='title' class="input">{{ form.title.label }}: {{ form.title() }}</div>
             <div name='text' class="textarea">{{ form.text.label }}: {{ form.text() }}</div>

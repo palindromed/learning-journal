@@ -26,9 +26,10 @@ DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
 
 
-association_table = Table('association_table', Base.metadata,
-                          Column('posts_id', Integer, ForeignKey('posts.id')),
-                          Column('category_id', Integer, ForeignKey('category.id'))
+association_table = Table(
+    'association_table', Base.metadata,
+    Column('posts_id', Integer, ForeignKey('posts.id')),
+    Column('category_id', Integer, ForeignKey('category.id'))
 )
 
 
@@ -43,18 +44,41 @@ class Post(Base):
     categories = relationship('Category', secondary=association_table,
                               back_populates="posts")
 
-
     def __json__(self, request):
+        """Create JSON of Post instance."""
         return {
             'id': self.id,
             'title': self.title,
             'text': self.text,
             'created': self.created.isoformat(),
-            'categories': self.categories
+            'categories': self.categories.name
         }
 
     def to_json(self, request=None):
+        """Return JSON of post instance."""
         return self.__json__(request)
+
+    @classmethod
+    def all(cls):
+        """Class method to return all posts."""
+        return DBSession.query(cls).order_by(cls.created.desc()).all()
+
+    @classmethod
+    def by_id(cls, post_id=None):
+        """Class method to get one post by id."""
+        return DBSession.query(cls).get(post_id)
+
+    @classmethod
+    def modify(cls, form, id):
+        """Update an existing post."""
+        # import pdb; pdb.set_trace()
+        instance = cls.by_id(id)
+        instance.title = form['title'].data
+        instance.text = form['text'].data
+        # instance.categories = form['categories'] # query cats + append/create and append
+        # instance.created = instance.created
+        DBSession.add(instance)
+        return instance
 
 
 class User(Base):
@@ -68,7 +92,6 @@ class User(Base):
 
     def verify_password(self, password):
         """Check for cleartext password, verify that provided pw is valid."""
-        # is it cleartext?
         if password == self.password:
             self.set_password(password)
 
@@ -79,12 +102,14 @@ class User(Base):
         self.password = blogger_pwd_context.encrypt(password)
 
     def __json__(self, request):
+        """Create JSON of user instance."""
         return {
             'id': self.id,
             'username': self.username,
         }
 
     def to_json(self, request=None):
+        """Return JSON of user instance."""
         return self.__json__(request)
 
 
@@ -101,8 +126,8 @@ class Comment(Base):
     author = relationship("User", backref='my_comments')
     parent = relationship("Post", backref="comments")
 
-
     def __json__(self, request):
+        """Return JSON of comment instance."""
         return {
             'id': self.id,
             'thoughts': self.thoughts,
@@ -111,10 +136,13 @@ class Comment(Base):
         }
 
     def to_json(self, request=None):
-         return self.__json__(request)
+        """Get JSON of comment instance."""
+        return self.__json__(request)
 
 
 class Category(Base):
+    """Class for category for post or comment."""
+
     __tablename__ = 'category'
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, unique=True)
@@ -124,10 +152,11 @@ class Category(Base):
         back_populates="categories")
 
     def __init__(self, name):
+        """Initialize with name of category."""
         self.name = name
 
-
     def __json__(self, request):
+        """Create JSON of category instance."""
         return {
             'id': self.id,
             'name': self.name,
@@ -135,4 +164,5 @@ class Category(Base):
         }
 
     def to_json(self, request=None):
-         return self.__json__(request)
+        """Return JSON of category."""
+        return self.__json__(request)
