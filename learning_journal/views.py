@@ -80,32 +80,44 @@ def edit_view(request):
     edit_id = int(request.matchdict['post_id'])
     post_to_edit = Post.by_id(edit_id)
     form = ModifyPostForm(request.POST, post_to_edit)
+    cat_query = Post.my_categories(post_to_edit)
 
-    form.existing_categories.choices = Post.get_choices()
+# form.existing_categories.choices = [print(cat.posts.Post) for cat in cat_query]
+    # form.existing_categories.default = Post.get_choices()
+    form.existing_categories.process(request.POST)
 
     detail_url = request.route_url('detail', post_id=edit_id)
 
     if request.method == 'POST' and form.validate():
-        Post.modify(form, edit_id)
+        # Post.modify(form, edit_id)
         return HTTPFound(location=detail_url)
 
     return {'form': form, 'use_case': 'Edit'}
 
 
-
-@view_config(route_name='add_entry', request_method='POST', check_csrf=True)
 @view_config(route_name='add_entry', renderer="templates/edit.jinja2",
              permission='change')
+@view_config(route_name='add_entry', request_method='POST', check_csrf=True)
+# @view_config(route_name='add_entry_json', request_method='POST', xhr=True, check_csrf=True,
+#              renderer='json')
 def create_view(request):
     form = ModifyPostForm(request.POST)
+    form.existing_categories.choices = Post.get_choices()
+    #form.existing_categories.default = Post.my_categories()
+    form.existing_categories.process(request.POST)
+
     if request.method == 'POST' and form.validate():
-        categories = Category(name=form.categories.data)
         new_post = Post(title=form.title.data, text=form.text.data)
-        new_post.categories.append(categories)
-        categories.posts.append(new_post)
-        try:
-            DBSession.add(new_post)
+        if form.categories.data:
+            print("I see data")
+            categories = Category(name=form.categories.data)
             new_post.categories.append(categories)
+            categories.posts.append(new_post)
+        try:
+            # import pdb; pdb.set_trace()
+            DBSession.add(new_post)
+            if form.categories.data:
+                new_post.categories.append(categories)
             DBSession.flush()
             detail_id = new_post.id
             re_route = request.route_url('detail', post_id=detail_id)

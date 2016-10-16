@@ -56,6 +56,7 @@ def main(global_config, **settings):
     config.add_route('home', '/')
     config.add_route('detail', '/post/{post_id:\d+}')
     config.add_route('add_entry', '/create')
+    config.add_route('add_entry_json', 'add_entry.json')
     config.add_route('edit', '/edit/{post_id:\d+}')
 
     config.scan()

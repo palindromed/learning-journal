@@ -42,7 +42,7 @@ class Post(Base):
     text = Column(Unicode)
     created = Column(DateTime, default=datetime.datetime.utcnow)
     categories = relationship('Category', secondary=association_table,
-                              back_populates="posts")
+                              back_populates="posts", lazy="dynamic")
 
     def __json__(self, request):
         """Create JSON of Post instance."""
@@ -80,10 +80,23 @@ class Post(Base):
         return instance
 
     @classmethod
-    def get_choices(self):
+    def append_or_create_cat(cls, form, post):
+        # if category is in db, append/add relationship
+        # if not in db, create then append/add
+        pass
+
+    @classmethod
+    def get_choices(cls):
         cats = DBSession.query(Category).order_by(Category.name).all()
         return [(cat.id, cat.name) for cat in cats]
 
+    @classmethod
+    def my_categories(cls, post):
+                    # user = DBSession.query(User).filter(User.username == request.authenticated_userid).first()
+        # check query: am i returning posts or categories????
+        return DBSession.query(Category).all()
+        # .filter(Category.posts.any(title=post.title)).all()
+        # return [cat.name for cat in cats]
 
 class User(Base):
     """Create user class so individuals can register and login."""
@@ -153,7 +166,8 @@ class Category(Base):
     posts = relationship(
         "Post",
         secondary=association_table,
-        back_populates="categories")
+        back_populates="categories",
+        lazy="dynamic")
 
     def __init__(self, name):
         """Initialize with name of category."""

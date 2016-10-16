@@ -39,10 +39,7 @@ def populate_db(json_for_post):
 
 
 def get_posts():
-    # get posts from api
     http_response_text = request_posts()
-    # read posts from file for testing
-    # http_response_text = read_posts()
     json_load = json.loads(http_response_text)
     return sift_for_post_json(json_load)
 

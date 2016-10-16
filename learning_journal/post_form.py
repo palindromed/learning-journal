@@ -17,7 +17,7 @@ class ModifyPostForm(Form):
     text = TextAreaField('text', [validators.Length(min=6)])
     categories = StringField('categories', [validators.Length(max=128)])
 
-    existing_categories = SelectMultipleField('Category', coerce=int)
+    existing_categories = SelectMultipleField('Category', default=[], coerce=int)
 
 
 class UserForm(Form):

@@ -18,9 +18,11 @@
           <form id="{{use_case}}" method='POST' class="form-horizontal">
           <input type="hidden" name="postid" value="{{form.id.data}}"/>
           <select>
+          {% if form.existing_categories.choices %}
           {% for cat in form.existing_categories.choices %}
           <option value="{{cat[0]}}">{{cat[1]}}</option>
           {% endfor %}
+          {% endif %}
           </select>
             <div name='category' class="input">
             {{ form.categories.label }}:   {{ form.categories()}}</div>
